@@ -8,28 +8,6 @@ import { mergeProps as mergePropsDefault } from './utils';
 
 // type InferRef<T> = T extends RefAttributes<infer R> | ClassAttributes<infer R> ? R : unknown;
 
-/*
-  Example usage:
-  const ConfiguredButton = configured(Button, ({ disabled, size }) => ({
-  style: StyleSheet.flatten([
-    {
-      backgroundColor: 'blue',
-    },
-    disabled && {
-      backgroundColor: '#eee',
-    },
-    size === 'big' ? {
-      height: 200,
-    } : {
-      height: 50,
-    }
-  ]),
-
-  <ConfiguredButton size="small" onPress={action('clicked-text')} disabled>
-    Test
-  </ConfiguredButton>
-}));
- */
 // TODO: implement boolean variants
 // TODO2: maybe we should leave baseConfig even when there is no variants
 export function configured<T extends ElementType, TConfig extends ComponentConfig<T>>(

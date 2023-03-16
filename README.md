@@ -1,61 +1,99 @@
-# @appello/axios-offline
+# react-configured
 
-[![npm package](https://badgen.net/npm/v/@appello/axios-offline)](https://www.npmjs.com/package/@appello/axios-offline)
-[![License: MIT](https://badgen.net/npm/license/@appello/axios-offline)](https://opensource.org/licenses/MIT)
+[![npm package](https://badgen.net/npm/v/react-configured)](https://www.npmjs.com/package/react-configured)
+[![License: MIT](https://badgen.net/npm/license/react-configured)](https://opensource.org/licenses/MIT)
 
-[//]: # ([![npm downloads]&#40;https://badgen.net/npm/dw/@appello/axios-offline&#41;]&#40;https://www.npmjs.com/package/@appello/axios-offline&#41;)
+[//]: # ([![npm downloads]&#40;https://badgen.net/npm/dw/react-configured&#41;]&#40;https://www.npmjs.com/package/react-configured&#41;)
 
-Remembering failed requests and repeating when an internet connection is available
-
-## Credentials  
-This package is based on a work of [jonkofee](https://github.com/jonkofee).
+Configure react components with default props and styles
 
 ## Installation
 ### Using npm
 ```bash
-npm install axios localforage # install peer dependencies
-npm install @appello/axios-offline
+npm install react-configured
 ```
 
 ### Using yarn
 ```bash
-yarn add axios localforage # install peer dependencies
-yarn add @appello/axios-offline
+yarn add react-configured
 ```
 
-## Usage example
+## Usage example (React Native)
 
 ```typescript
-import axios, { AxiosAdapter } from 'axios';
-import { AxiosOffline } from '@appello/axios-offline';
-import NetInfo from '@react-native-community/netinfo';
-import LocalForage from 'localforage';
+import { ElementType } from 'react';
+import configured, { PartialProps } from 'react-configured';
 
-const offlineUrls = ['/list', '/profile'];
-
-export const axiosOfflineInstance = new AxiosOffline({
-  defaultAdapter: axios.defaults.adapter as AxiosAdapter, // require, basic adapter
-  storageOptions: {
-    name: 'axios-offline', // optional, default: "axios-stack"
-    driver: LocalForage.LOCALSTORAGE, // optional, default: LocalForage.LOCALSTORAGE
-  },
-  shouldStoreRequest: config => {
-    return config.method === 'POST' && offlineUrls.includes(config.url as string);
-  },
-  getResponsePlaceholder: config => ({
-    config,
-    headers: {},
-    data: undefined,
-    status: HttpStatusCode.Ok,
-    statusText: 'Request successfully stored till back online!',
-  }),
+export const mergePropsWithStyle = <T extends ElementType,
+  TProps extends PartialProps<T>,
+  TSecondProps extends PartialProps<T>,
+  >(
+  baseProps: TProps,
+  variantProps: TSecondProps,
+): TProps | TSecondProps => ({
+  ...baseProps,
+  ...variantProps,
+  ...('style' in baseProps && 'style' in variantProps
+    ? {
+      style: StyleSheet.compose(baseProps.style, variantProps.style),
+    }
+    : {}),
 });
 
-export const Api = axios.create({
-  adapter: axiosOfflineInstance.adapter,
-});
+export type ButtonConfig = ComponentConfig<typeof BaseButton>;
 
-window.addEventListener('online', (event) => {
-  axiosOfflineInstance.sendRequestsFromStore();
-});
+export type FuncButtonConfig = FuncComponentConfig<typeof BaseButton, ButtonConfig>;
+
+export const Button = configured(BaseButton, (props): ButtonConfig => {
+  const theme = useUIKitTheme();
+
+  const { disabled, variant } = props;
+
+  const styles = StyleSheet.create({
+    baseStyle: {
+      height: 54,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+      borderStyle: 'solid',
+      borderWidth: 0,
+    },
+    disabled: {
+      backgroundColor: theme.colors.gray['5'],
+    },
+    disabled__text: {
+      color: theme.colors.gray['3'],
+    },
+    'variant:primary': {
+      backgroundColor: theme.colors.primary,
+    },
+    'variant:primary__text': {
+      color: theme.colors.white,
+    },
+    'variant:secondary': {
+      backgroundColor: theme.colors.white,
+      borderWidth: 1,
+      borderColor: theme.colors.gray['5'],
+    },
+    'variant:secondary__text': {
+      color: theme.colors.black['2'],
+    },
+  });
+
+  return {
+    style: StyleSheet.flatten([
+      styles.baseStyle,
+      variant === 'primary' ? styles['variant:primary'] : styles['variant:secondary'],
+      disabled && styles.disabled,
+    ]),
+    loaderColor: theme.colors.white,
+    activeOpacity: 0.85,
+    labelProps: {
+      variant: 'p3',
+      style: [styles['variant:primary__text'], disabled && styles.disabled__text],
+    },
+  };
+}, { mergeProps: mergePropsWithStyle });
 ```

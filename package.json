@@ -1,7 +1,7 @@
 {
   "name": "react-configured",
   "version": "0.0.1-alpha",
-  "description": "Configure react components with default props",
+  "description": "Configure react components with default props and styles",
   "repository": "github.com:Appello-Pty-Ltd/react-configured.git",
   "homepage": "https://github.com/Appello-Pty-Ltd/react-configured",
   "keywords": [
